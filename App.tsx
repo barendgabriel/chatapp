@@ -2,9 +2,15 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Start from './src/screens/Start'; // Import Start screen
-import Chat from './src/screens/Chat'; // Import Chat screen (we'll create this next)
+import Chat from './src/screens/Chat'; // Import Chat screen
 
-const Stack = createStackNavigator();
+// Define the types for the screens
+type RootStackParamList = {
+  Start: undefined;
+  Chat: { userName: string }; // Pass userName to Chat screen
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
 
 const App = () => {
   return (
