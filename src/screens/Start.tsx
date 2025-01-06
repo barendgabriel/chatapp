@@ -4,55 +4,72 @@ import {
   TextInput,
   TouchableOpacity,
   Text,
+  ImageBackground,
   StyleSheet,
 } from 'react-native';
 
+// Start Screen component
 const Start = ({ navigation }: any) => {
-  const [name, setName] = useState('');
+  const [name, setName] = useState<string>(''); // State to store the name input
 
-  // Handle button press to navigate to the chat screen
-  const handleStartChat = () => {
+  // Handle the navigation to the chat screen
+  const navigateToChat = () => {
     if (name.trim()) {
-      navigation.navigate('Chat', { userName: name }); // Pass name as parameter to chat screen
+      navigation.navigate('Chat', { userName: name }); // Passing name to the chat screen
     } else {
-      alert('Please enter your name.');
+      alert('Please enter a name');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleStartChat}>
-        <Text style={styles.buttonText}>Enter Chat</Text>
-      </TouchableOpacity>
-    </View>
+    <ImageBackground
+      source={require('../assets/background.jpg')}
+      style={styles.background}
+    >
+      <View style={styles.container}>
+        {/* Text Input for the name */}
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your name"
+          onChangeText={setName}
+          value={name}
+        />
+        {/* Button to navigate to the Chat screen */}
+        <TouchableOpacity style={styles.button} onPress={navigateToChat}>
+          <Text style={styles.buttonText}>Enter Chat</Text>
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
   );
 };
 
+// Styles for the Start screen
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+  },
+  container: {
+    width: '80%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   input: {
-    width: '80%',
-    padding: 12,
+    width: '100%',
+    height: 50,
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 16,
+    borderRadius: 5,
+    paddingLeft: 10,
+    marginBottom: 20,
   },
   button: {
-    backgroundColor: '#6200ee',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: '#007bff',
+    padding: 15,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
