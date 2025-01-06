@@ -22,9 +22,9 @@ const Start = ({ navigation }: any) => {
   };
 
   return (
-    // Update the source of ImageBackground to your new background image
+    // Updated image source path
     <ImageBackground
-      source={require('../assets/chatappbackground.jpg')} // Path to your new background image
+      source={require('../../assets/chatappbackground.jpg')} // Correct relative path
       style={styles.background}
     >
       <View style={styles.container}>
