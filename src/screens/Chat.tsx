@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const Chat = ({ route }: any) => {
-  const { userName } = route.params; // Get the userName passed from Start screen
+const Chat = ({ route, navigation }: any) => {
+  const { userName, bgColor } = route.params; // Get userName and bgColor passed from Start screen
+
+  useEffect(() => {
+    // Set the name in the navigation bar
+    navigation.setOptions({
+      title: userName, // Set the title in the header to the user's name
+    });
+  }, [navigation, userName]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: bgColor }]}>
       <Text style={styles.greeting}>Hello, {userName}!</Text>
     </View>
   );
