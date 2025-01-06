@@ -23,7 +23,7 @@ const Start = ({ navigation }: any) => {
 
   return (
     <ImageBackground
-      source={require('../assets/adaptive-icon.png')} // Using adaptive-icon.png as background
+      source={require('../../assets/adaptive-icon.png')} // Corrected path to the image
       style={styles.background}
     >
       <View style={styles.container}>
