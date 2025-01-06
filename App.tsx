@@ -1,19 +1,20 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import Start from './src/screens/Start';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import Start from './src/screens/Start'; // Import Start screen
+import Chat from './src/screens/Chat'; // Import Chat screen (we'll create this next)
 
-const App: React.FC = () => {
+const Stack = createStackNavigator();
+
+const App = () => {
   return (
-    <View style={styles.container}>
-      <Start />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Start">
+        <Stack.Screen name="Start" component={Start} />
+        <Stack.Screen name="Chat" component={Chat} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default App;
