@@ -22,8 +22,9 @@ const Start = ({ navigation }: any) => {
   };
 
   return (
+    // Update the source of ImageBackground to your new background image
     <ImageBackground
-      source={require('../../assets/adaptive-icon.png')} // Corrected path to the image
+      source={require('../assets/chatappbackground.jpg')} // Path to your new background image
       style={styles.background}
     >
       <View style={styles.container}>
