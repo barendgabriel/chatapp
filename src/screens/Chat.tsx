@@ -1,9 +1,9 @@
-import { GiftedChat } from 'react-native-gifted-chat';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 const Chat = ({ route, navigation }: any) => {
   const { userName, bgColor } = route.params; // Get userName and bgColor passed from Start screen
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     // Set the name in the navigation bar
@@ -15,6 +15,7 @@ const Chat = ({ route, navigation }: any) => {
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
       <Text style={styles.greeting}>Hello, {userName}!</Text>
+      {/* You can integrate GiftedChat here with messages */}
     </View>
   );
 };
