@@ -1,14 +1,37 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 
 const Chat = ({ route, navigation }: any) => {
-  const { name } = route.params; // Get the user name passed from the previous screen
+  const { name, bgColor } = route.params;
 
-  // Set initial state for messages
   const [messages, setMessages] = useState<IMessage[]>([]);
 
-  // Function to handle sending a new message
+  useEffect(() => {
+    setMessages([
+      {
+        _id: 1,
+        text: 'Welcome! You’ve entered the chat.',
+        createdAt: new Date(),
+        system: true,
+        user: {
+          _id: 0, // A unique ID for the system user
+          name: 'System', // System user's name
+        },
+      },
+      {
+        _id: 2,
+        text: 'Hello! How can I assist you today?',
+        createdAt: new Date(),
+        user: {
+          _id: 2,
+          name: 'React Native Bot',
+          avatar: 'https://placeimg.com/140/140/tech',
+        },
+      },
+    ]);
+  }, []);
+
   const onSend = (newMessages: IMessage[]) => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, newMessages)
@@ -16,35 +39,26 @@ const Chat = ({ route, navigation }: any) => {
   };
 
   useEffect(() => {
-    // Set an initial message in the chat
-    setMessages([
-      {
-        _id: 1,
-        text: 'Hello developer',
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'React Native',
-          avatar: 'https://placeimg.com/140/140/any',
-        },
-      },
-    ]);
-  }, []);
-
-  useEffect(() => {
-    // Set the title of the navigation header to the user's name
     navigation.setOptions({ title: name });
-  }, [name, navigation]); // Add name to dependencies so it updates if the name changes
+  }, [navigation, name]);
 
   return (
-    <GiftedChat
-      messages={messages} // Display the list of messages
-      onSend={(messages) => onSend(messages)} // Handle sending new messages
-      user={{
-        _id: 1, // ID of the current user
-        name: name, // Name of the current user (passed from params)
-      }}
-    />
+    <View style={[styles.container, { backgroundColor: bgColor }]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+      >
+        <GiftedChat
+          messages={messages}
+          onSend={(messages) => onSend(messages)}
+          user={{
+            _id: 1,
+            name,
+          }}
+        />
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
