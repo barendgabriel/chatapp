@@ -1,26 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
-import { View, Text, StyleSheet } from 'react-native';
-
-// Define the structure of a message
-interface User {
-  _id: number;
-  name: string;
-  avatar: string;
-}
 
 const Chat = ({ route, navigation }: any) => {
-  const { userName, bgColor } = route.params; // Get userName and bgColor passed from Start screen
+  const { name } = route.params; // Get the user name passed from the previous screen
 
-  // Explicitly type the messages state as IMessage[]
+  // Set initial state for messages
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [messageText, setMessageText] = useState(''); // Track typed text in the input field
+
+  // Function to handle sending a new message
+  const onSend = (newMessages: IMessage[]) => {
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, newMessages)
+    );
+  };
 
   useEffect(() => {
-    // Set a static initial message
+    // Set an initial message in the chat
     setMessages([
       {
-        _id: 1, // _id can now be number or string, as per IMessage definition
+        _id: 1,
         text: 'Hello developer',
         createdAt: new Date(),
         user: {
@@ -32,50 +31,26 @@ const Chat = ({ route, navigation }: any) => {
     ]);
   }, []);
 
-  // Function to handle sending a new message
-  const onSend = (newMessages: IMessage[]) => {
-    // Update messages state with the new message
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, newMessages)
-    );
-    // Clear the input field after sending the message
-    setMessageText('');
-  };
-
   useEffect(() => {
-    // Set the name in the navigation bar
-    navigation.setOptions({
-      title: userName, // Set the title in the header to the user's name
-    });
-  }, [navigation, userName]);
+    // Set the title of the navigation header to the user's name
+    navigation.setOptions({ title: name });
+  }, [name, navigation]); // Add name to dependencies so it updates if the name changes
 
   return (
-    <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <Text style={styles.greeting}>Hello, {userName}!</Text>
-      <GiftedChat
-        messages={messages}
-        onSend={(messages) => onSend(messages)} // Sending new messages
-        user={{
-          _id: 1, // ID of the current user
-          name: userName, // Name of the current user
-        }}
-        text={messageText} // Bind the input field text to state
-        onInputTextChanged={(text) => setMessageText(text)} // Update state as the user types
-      />
-    </View>
+    <GiftedChat
+      messages={messages} // Display the list of messages
+      onSend={(messages) => onSend(messages)} // Handle sending new messages
+      user={{
+        _id: 1, // ID of the current user
+        name: name, // Name of the current user (passed from params)
+      }}
+    />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  greeting: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
   },
 });
 
