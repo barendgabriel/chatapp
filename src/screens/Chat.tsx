@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GiftedChat, IMessage } from 'react-native-gifted-chat'; // Import IMessage from GiftedChat
+import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { View, Text, StyleSheet } from 'react-native';
 
 // Define the structure of a message
@@ -54,7 +54,7 @@ const Chat = ({ route, navigation }: any) => {
       <Text style={styles.greeting}>Hello, {userName}!</Text>
       <GiftedChat
         messages={messages}
-        onSend={(messages) => onSend(messages)}
+        onSend={(messages) => onSend(messages)} // Sending new messages
         user={{
           _id: 1, // ID of the current user
           name: userName, // Name of the current user
