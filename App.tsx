@@ -22,13 +22,13 @@ type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 
 const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_AUTH_DOMAIN',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-  appId: 'YOUR_APP_ID',
-  measurementId: 'YOUR_MEASUREMENT_ID',
+  apiKey: 'AIzaSyCqI4K-ZEHeylz21GPL_RJ4a03NwMPCI1w',
+  authDomain: 'chatapp-24229.firebaseapp.com',
+  projectId: 'chatapp-24229',
+  storageBucket: 'chatapp-24229.firebasestorage.app',
+  messagingSenderId: '205101684549',
+  appId: '1:205101684549:web:ac029478185e05c4b7902c',
+  measurementId: 'G-VGG64YCQ8R',
 };
 
 const App = () => {
