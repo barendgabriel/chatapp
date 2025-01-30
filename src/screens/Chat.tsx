@@ -12,7 +12,7 @@ import {
 import { getAuth } from 'firebase/auth';
 
 const Chat = ({ route, navigation }: any) => {
-  const { name, bgColor } = route.params;
+  const { userName, bgColor } = route.params; // Ensure userName is received correctly
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const db = getFirestore(); // Initialize Firestore
@@ -20,7 +20,7 @@ const Chat = ({ route, navigation }: any) => {
   const user = auth.currentUser;
 
   useEffect(() => {
-    navigation.setOptions({ title: name });
+    navigation.setOptions({ title: userName });
 
     // Fetch messages from Firestore in real-time
     const messagesRef = collection(db, 'messages');
@@ -43,16 +43,22 @@ const Chat = ({ route, navigation }: any) => {
 
     // Cleanup the listener
     return () => unsubscribe();
-  }, [db, name, navigation]);
+  }, [db, userName, navigation]);
 
   const onSend = (newMessages: IMessage[]) => {
+    // Ensure that userName is properly passed and not undefined
+    if (!userName) {
+      console.error('User name is undefined.');
+      return;
+    }
+
     // Save new message to Firestore
     const newMessage = newMessages[0]; // The message to be sent
     addDoc(collection(db, 'messages'), {
       text: newMessage.text,
       createdAt: new Date(),
       userId: user?.uid, // Get user ID from Firebase Authentication
-      userName: newMessage.user.name,
+      userName: userName, // Use userName passed from the Start screen
     }).catch((error) => {
       console.error('Error adding document: ', error);
     });
@@ -75,7 +81,7 @@ const Chat = ({ route, navigation }: any) => {
           onSend={(messages) => onSend(messages)}
           user={{
             _id: user?.uid || 1, // Use Firebase user ID if available, else fallback
-            name,
+            name: userName, // Ensure userName is passed correctly
           }}
         />
       </KeyboardAvoidingView>
