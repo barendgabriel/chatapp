@@ -63,8 +63,8 @@ const App = () => {
           name="Chat"
           component={Chat}
           initialParams={{
-            userName: user?.displayName || 'Anonymous',
-            userId: user?.uid || '',
+            userName: user?.displayName || 'Anonymous', // Use default name if not set
+            userId: user?.uid || '', // Pass the userId to Chat screen
           }}
         />
       </Stack.Navigator>
