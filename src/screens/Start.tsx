@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { getAuth, signInAnonymously } from 'firebase/auth'; // Import Firebase Authentication
 
 const Start = ({ navigation }: any) => {
   const [name, setName] = useState<string>(''); // State to store the name input
@@ -18,50 +17,35 @@ const Start = ({ navigation }: any) => {
   // Handle the navigation to the chat screen
   const navigateToChat = () => {
     if (name.trim()) {
-      const auth = getAuth();
-
-      // Sign in anonymously
-      signInAnonymously(auth)
-        .then((userCredential) => {
-          const user = userCredential.user;
-
-          // Once logged in, navigate to the Chat screen with user details
-          navigation.navigate('Chat', {
-            userId: user.uid, // Pass the user ID
-            userName: name, // Pass the user name
-          });
-        })
-        .catch((error) => {
-          console.error('Error signing in anonymously:', error);
-          Alert.alert('Error', 'Could not sign in. Please try again.');
-        });
+      navigation.navigate('Chat', { userName: name }); // Passing name to the chat screen
     } else {
       Alert.alert('Validation Error', 'Please enter a name'); // Updated to use Alert for consistency
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <View style={styles.container}>
       <ImageBackground
-        source={require('./assets/background.png')}
-        style={styles.background}
+        source={require('../../assets/chatappbackground.jpg')} // Correct path to the image
+        style={styles.backgroundImage}
       >
-        <View style={styles.overlay}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.container}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+        >
           <TextInput
             style={styles.input}
             placeholder="Enter your name"
             value={name}
             onChangeText={setName}
           />
-          <TouchableOpacity style={styles.button} onPress={navigateToChat}>
+          <TouchableOpacity onPress={navigateToChat} style={styles.button}>
             <Text style={styles.buttonText}>Start Chatting</Text>
           </TouchableOpacity>
-        </View>
+        </KeyboardAvoidingView>
       </ImageBackground>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -69,36 +53,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  background: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  overlay: {
+  backgroundImage: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 20,
+    width: '100%',
   },
   input: {
     width: '80%',
-    height: 40,
-    backgroundColor: 'white',
-    paddingLeft: 10,
+    height: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 25,
+    paddingLeft: 20,
     marginBottom: 20,
-    borderRadius: 5,
   },
   button: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 25,
     width: '80%',
-    height: 50,
-    backgroundColor: '#6200EE',
-    justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 5,
   },
   buttonText: {
-    color: 'white',
-    fontSize: 18,
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
