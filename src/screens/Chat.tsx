@@ -1,46 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  addDoc,
+} from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 const Chat = ({ route, navigation }: any) => {
   const { name, bgColor } = route.params;
 
   const [messages, setMessages] = useState<IMessage[]>([]);
+  const db = getFirestore(); // Initialize Firestore
+  const auth = getAuth(); // Initialize Firebase Authentication
+  const user = auth.currentUser;
 
   useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: 'Welcome! You’ve entered the chat.',
-        createdAt: new Date(),
-        system: true,
-        user: {
-          _id: 0, // A unique ID for the system user
-          name: 'System', // System user's name
-        },
-      },
-      {
-        _id: 2,
-        text: 'Hello! How can I assist you today?',
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'React Native Bot',
-          avatar: 'https://placeimg.com/140/140/tech',
-        },
-      },
-    ]);
-  }, []);
+    navigation.setOptions({ title: name });
+
+    // Fetch messages from Firestore in real-time
+    const messagesRef = collection(db, 'messages');
+    const q = query(messagesRef, orderBy('createdAt', 'desc')); // Order by createdAt descending
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const fetchedMessages: IMessage[] = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          _id: doc.id,
+          text: data.text,
+          createdAt: data.createdAt.toDate(),
+          user: {
+            _id: data.userId,
+            name: data.userName,
+          },
+        };
+      });
+      setMessages(fetchedMessages);
+    });
+
+    // Cleanup the listener
+    return () => unsubscribe();
+  }, [db, name, navigation]);
 
   const onSend = (newMessages: IMessage[]) => {
+    // Save new message to Firestore
+    const newMessage = newMessages[0]; // The message to be sent
+    addDoc(collection(db, 'messages'), {
+      text: newMessage.text,
+      createdAt: new Date(),
+      userId: user?.uid, // Get user ID from Firebase Authentication
+      userName: newMessage.user.name,
+    }).catch((error) => {
+      console.error('Error adding document: ', error);
+    });
+
+    // Append the new message to the local state
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, newMessages)
     );
   };
-
-  useEffect(() => {
-    navigation.setOptions({ title: name });
-  }, [navigation, name]);
 
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
@@ -53,7 +74,7 @@ const Chat = ({ route, navigation }: any) => {
           messages={messages}
           onSend={(messages) => onSend(messages)}
           user={{
-            _id: 1,
+            _id: user?.uid || 1, // Use Firebase user ID if available, else fallback
             name,
           }}
         />
