@@ -17,7 +17,6 @@ const Start = ({ navigation }: any) => {
   // Handle the navigation to the chat screen
   const navigateToChat = () => {
     if (name.trim()) {
-      console.log('User Name:', name); // Add this to verify the userName
       navigation.navigate('Chat', { userName: name }); // Passing name to the chat screen
     } else {
       Alert.alert('Validation Error', 'Please enter a name'); // Updated to use Alert for consistency

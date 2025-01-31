@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, KeyboardAvoidingView, Platform, View } from 'react-native';
-import { GiftedChat, IMessage } from 'react-native-gifted-chat';
+import {
+  GiftedChat,
+  IMessage,
+  InputToolbar,
+  InputToolbarProps,
+} from 'react-native-gifted-chat';
 import {
   getFirestore,
   collection,
@@ -8,10 +13,12 @@ import {
   orderBy,
   onSnapshot,
   addDoc,
+  Unsubscribe,
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Chat = ({ route, navigation }: any) => {
+const Chat = ({ route, navigation, isConnected }: any) => {
   const { userName, bgColor } = route.params; // Ensure userName is received correctly
 
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -21,29 +28,53 @@ const Chat = ({ route, navigation }: any) => {
 
   useEffect(() => {
     navigation.setOptions({ title: userName });
+    let unsubscribe: Unsubscribe;
 
-    // Fetch messages from Firestore in real-time
-    const messagesRef = collection(db, 'messages');
-    const q = query(messagesRef, orderBy('createdAt', 'desc')); // Order by createdAt descending
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const fetchedMessages: IMessage[] = querySnapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          _id: doc.id,
-          text: data.text,
-          createdAt: data.createdAt.toDate(),
-          user: {
-            _id: data.userId,
-            name: data.userName,
-          },
-        };
+    if (isConnected === true) {
+      // Fetch messages from Firestore in real-time
+      const messagesRef = collection(db, 'messages');
+      const q = query(messagesRef, orderBy('createdAt', 'desc')); // Order by createdAt descending
+
+      unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const fetchedMessages: IMessage[] = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            _id: doc.id,
+            text: data.text,
+            createdAt: data.createdAt.toDate(),
+            user: {
+              _id: data.userId,
+              name: data.userName,
+            },
+          };
+        });
+        cachedMessages(fetchedMessages);
+        setMessages(fetchedMessages);
       });
-      setMessages(fetchedMessages);
-    });
+    } else {
+      loadCachedMessages();
+    }
 
-    // Cleanup the listener
-    return () => unsubscribe();
-  }, [db, userName, navigation]);
+    // Clean up code
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [db, userName, navigation, isConnected]);
+
+  const loadCachedMessages = async () => {
+    const cachedMessages = (await AsyncStorage.getItem('messages')) || '[]';
+    setMessages(JSON.parse(cachedMessages));
+  };
+
+  const cachedMessages = async (messagesToCache: IMessage[]) => {
+    try {
+      await AsyncStorage.setItem('messages', JSON.stringify(messagesToCache));
+    } catch (error: any) {
+      console.log(error.message);
+    }
+  };
 
   const onSend = (newMessages: IMessage[]) => {
     // Ensure that userName is properly passed and not undefined
@@ -69,6 +100,11 @@ const Chat = ({ route, navigation }: any) => {
     );
   };
 
+  const renderInputToolbar = (props: InputToolbarProps<IMessage>) => {
+    if (isConnected === true) return <InputToolbar {...props} />;
+    else return null;
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
       <KeyboardAvoidingView
@@ -78,6 +114,7 @@ const Chat = ({ route, navigation }: any) => {
       >
         <GiftedChat
           messages={messages}
+          renderInputToolbar={renderInputToolbar}
           onSend={(messages) => onSend(messages)}
           user={{
             _id: user?.uid || 1, // Use Firebase user ID if available, else fallback
