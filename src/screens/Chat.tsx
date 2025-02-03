@@ -17,8 +17,10 @@ import {
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomActions from './CustomActions';
+import MapView from 'react-native-maps';
 
-const Chat = ({ route, navigation, isConnected }: any) => {
+const Chat = ({ route, navigation, storage, isConnected }: any) => {
   const { userName, bgColor } = route.params; // Ensure userName is received correctly
 
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -41,6 +43,7 @@ const Chat = ({ route, navigation, isConnected }: any) => {
           return {
             _id: doc.id,
             text: data.text,
+            location: data.location,
             createdAt: data.createdAt.toDate(),
             user: {
               _id: data.userId,
@@ -76,7 +79,7 @@ const Chat = ({ route, navigation, isConnected }: any) => {
     }
   };
 
-  const onSend = (newMessages: IMessage[]) => {
+  const onSend = (newMessages: IMessage[] | any) => {
     // Ensure that userName is properly passed and not undefined
     if (!userName) {
       console.error('User name is undefined.');
@@ -86,7 +89,8 @@ const Chat = ({ route, navigation, isConnected }: any) => {
     // Save new message to Firestore
     const newMessage = newMessages[0]; // The message to be sent
     addDoc(collection(db, 'messages'), {
-      text: newMessage.text,
+      text: newMessage.text || null,
+      location: newMessage.location || null,
       createdAt: new Date(),
       userId: user?.uid, // Get user ID from Firebase Authentication
       userName: userName, // Use userName passed from the Start screen
@@ -105,6 +109,28 @@ const Chat = ({ route, navigation, isConnected }: any) => {
     else return null;
   };
 
+  const renderCustomActions = (props: any) => {
+    return <CustomActions storage={storage} {...props} onSend={onSend} />;
+  };
+
+  const renderCustomView = (props: any) => {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: bgColor }]}>
       <KeyboardAvoidingView
@@ -115,6 +141,8 @@ const Chat = ({ route, navigation, isConnected }: any) => {
         <GiftedChat
           messages={messages}
           renderInputToolbar={renderInputToolbar}
+          renderActions={renderCustomActions}
+          renderCustomView={renderCustomView}
           onSend={(messages) => onSend(messages)}
           user={{
             _id: user?.uid || 1, // Use Firebase user ID if available, else fallback
